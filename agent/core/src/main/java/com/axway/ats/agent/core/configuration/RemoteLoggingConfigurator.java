@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import com.axway.ats.agent.core.exceptions.AgentException;
-import com.axway.ats.core.threads.ThreadsPerCaller;
 import com.axway.ats.log.LogLevel;
 import com.axway.ats.log.appenders.AbstractDbAppender;
 import com.axway.ats.log.appenders.ActiveDbAppender;
@@ -100,8 +99,8 @@ public class RemoteLoggingConfigurator implements Configurator {
                     }
 
                     //set the effective logging level for threshold if new one is set
-                    if (appenderConfiguration.getLoggingThreshold() == null
-                        || appenderConfiguration.getLoggingThreshold().toInt() != atsDbLogLevel) {
+                    if (appenderConfiguration.getLoggingThreshold() == -1
+                        || appenderConfiguration.getLoggingThreshold() != atsDbLogLevel) {
 
                         /*
                          * Log4j is deprecating the Priority class used by setLoggingThreshold,
@@ -112,7 +111,7 @@ public class RemoteLoggingConfigurator implements Configurator {
                          */
                         final Level currentLevelBackup = log.getLevel();
                         log.setLevel(Level.toLevel(atsDbLogLevel));
-                        appenderConfiguration.setLoggingThreshold(log.getEffectiveLevel());
+                        appenderConfiguration.setLoggingThreshold(log.getEffectiveLevel().toInt());
                         log.setLevel(currentLevelBackup);
                     }
 
@@ -167,8 +166,8 @@ public class RemoteLoggingConfigurator implements Configurator {
                 log = Logger.getLogger(appenderLogger);
             }
 
-            log.setLevel(Level.toLevel(appenderConfiguration.getLoggingThreshold().toInt()));
-            
+            log.setLevel(Level.toLevel(appenderConfiguration.getLoggingThreshold()));
+
             //create the new appender
             PassiveDbAppender attachedAppender = new PassiveDbAppender();
             attachedAppender.setAppenderConfig(appenderConfiguration);
@@ -200,8 +199,6 @@ public class RemoteLoggingConfigurator implements Configurator {
         /*
          * This code is run on remote agent's side
          */
-
-        final String caller = ThreadsPerCaller.getCaller();
 
         needsToConfigureDbAppender = false;
         if (appenderConfiguration != null) {

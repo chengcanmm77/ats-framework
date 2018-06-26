@@ -291,7 +291,7 @@ public class DbEventRequestProcessor implements EventRequestProcessor {
         }
 
         LoggingEvent event = eventRequest.getEvent();
-        AbstractLoggingEvent dbAppenderEvent = event instanceof AbstractLoggingEvent
+        AbstractLoggingEvent dbAppenderEvent = event instanceof AbstractLoggingEvent 
                                                                                      ? ( AbstractLoggingEvent ) event
                                                                                      : null;
 

@@ -32,7 +32,6 @@ import org.apache.log4j.Category;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.apache.log4j.Priority;
 
 import com.axway.ats.agent.core.MultiThreadedActionHandler;
 import com.axway.ats.agent.webapp.restservice.model.SessionData;
@@ -87,11 +86,11 @@ public class AgentConfigurationServiceImpl extends BaseRestServiceImpl {
          */
 
         // We do some cleanup here, it is not be very resource consuming.
-        cleanupExpiredSessions( dbConnectionPojo );
+        cleanupExpiredSessions(dbConnectionPojo);
 
         // this is the first request, we will create a new session associated with this caller
-        final String caller = getCallerForNewSession( request, dbConnectionPojo );
-        
+        final String caller = getCallerForNewSession(request, dbConnectionPojo);
+
         ThreadsPerCaller.registerThread(caller);
         try {
             // create DbAppenderConfiguration
@@ -101,7 +100,7 @@ public class AgentConfigurationServiceImpl extends BaseRestServiceImpl {
             newAppenderConfiguration.setUser(dbConnectionPojo.getDbUser());
             newAppenderConfiguration.setPassword(dbConnectionPojo.getDbPass());
             newAppenderConfiguration.setMode(dbConnectionPojo.getMode());
-            newAppenderConfiguration.setLoggingThreshold(Priority.toPriority(dbConnectionPojo.getLoggingThreshold()));
+            newAppenderConfiguration.setLoggingThreshold(dbConnectionPojo.getLoggingThreshold());
             newAppenderConfiguration.setMaxNumberLogEvents(dbConnectionPojo.getMaxNumberLogEvents());
 
             PassiveDbAppender alreadyExistingAppender = PassiveDbAppender.getCurrentInstance();
@@ -211,7 +210,7 @@ public class AgentConfigurationServiceImpl extends BaseRestServiceImpl {
 
                     dbLog.error("This test appears to be aborted by the user on the test executor side, but it kept running on the agent side."
                                 + " Now we cancel any further logging from the agent.");
-                    dbLog.leaveTestCase( caller );
+                    dbLog.leaveTestCase(caller);
                 } else {
                     joinToNewTescase = false;
 
@@ -225,7 +224,7 @@ public class AgentConfigurationServiceImpl extends BaseRestServiceImpl {
                  * */
                 restSystemMonitor = new RestSystemMonitor();
                 sd.setSystemMonitor(restSystemMonitor);
-                dbLog.joinTestCase( newTestCaseState, caller );
+                dbLog.joinTestCase(newTestCaseState, caller);
             }
 
             logClassPath(newTestCaseState);
@@ -253,7 +252,7 @@ public class AgentConfigurationServiceImpl extends BaseRestServiceImpl {
         final String caller = getCaller(request, basePojo);
         ThreadsPerCaller.registerThread(caller);
         try {
-            dbLog.leaveTestCase( caller );
+            dbLog.leaveTestCase(caller);
         } finally {
             ThreadsPerCaller.unregisterThread();
         }
@@ -291,7 +290,7 @@ public class AgentConfigurationServiceImpl extends BaseRestServiceImpl {
         PassiveDbAppender attachedAppender = new PassiveDbAppender();
 
         attachedAppender.setAppenderConfig(appenderConfiguration);
-        
+
         // calculate the time stamp offset, between the test executor and the agent
         attachedAppender.calculateTimeOffset(timestamp);
         // use a default pattern, as we log in the db
@@ -301,7 +300,7 @@ public class AgentConfigurationServiceImpl extends BaseRestServiceImpl {
         // attach the appender to the logging system
         Category log = Logger.getRootLogger();
 
-        log.setLevel(Level.toLevel(appenderConfiguration.getLoggingThreshold().toInt()));
+        log.setLevel(Level.toLevel(appenderConfiguration.getLoggingThreshold()));
         log.addAppender(attachedAppender);
 
     }
